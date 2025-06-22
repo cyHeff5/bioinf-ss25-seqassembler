@@ -65,6 +65,13 @@ Wenn `double` gewählt wurde, gib an, wie die Orientierung der Fragmente gewähl
 
 Nach dem Einlesen oder Generieren der Fragmente beginnt der **Greedy-Assembly**, und das Tool versucht, die ursprüngliche DNA-Sequenz zu rekonstruieren.
 
+**Hinweis:**
+Sollte während der Assembly der folgende Fehler auftreten:
+```bash
+ValueError: Keine weiteren Overlaps vorhanden – Sequenz kann nicht vollständig rekonstruiert werden.
+```
+bedeutet das, dass beim Assembly **Fragmente übrig geblieben sind**, die **keine Overlaps zu anderen Fragmenten** haben. Die Sequenzierung war also nicht Erfolgreich.
+
 ---
 ### 7. Ausgabe und Erfolgskontrolle
 
