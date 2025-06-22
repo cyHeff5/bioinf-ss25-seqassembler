@@ -32,3 +32,42 @@ Wähle, ob mit einem Einzelstrang oder Doppelstrang gearbeitet werden soll:
 - `double` → Fragmente können zufällig als Reverse Complements vorliegen
 
 ---
+### 3. Datei einlesen (`file`)
+
+Wenn `file` gewählt wurde:
+
+- Gib den Dateinamen ein, z. B. `fragmentsEinzelstrang_short.txt`
+- Die Datei muss im Verzeichnis `data/` liegen
+
+---
+### 4. Fragmente generieren (`generate`)
+
+Wenn `generate` gewählt wurde, wird nach folgenden Parametern gefragt:
+
+| Eingabe                 | Beschreibung                                           | Beispiel      |
+|------------------------|--------------------------------------------------------|---------------|
+| Länge der DNA          | Gesamtlänge der zu generierenden DNA-Sequenz          | `100`         |
+| Fragmentlänge          | Durchschnittliche Länge eines Fragments               | `20`          |
+| Mindestüberlappung     | Minimale Überlappung zwischen zwei Fragmenten         | `5`           |
+| Shuffle                | Fragmente zufällig durchmischen? (`y/n`)              | `y`           |
+| Reverse Ratio (optional) | Anteil an Reverse Complements (nur bei `double`)     | `0.4`         |
+
+---
+### 5. Orientierung (nur bei `double`)
+
+Wenn `double` gewählt wurde, gib an, wie die Orientierung der Fragmente gewählt werden soll:
+
+- `local` → Jedes Fragment wird nacheinaner bewertet und orientiert
+- `global` → In jedem Schritt wird das Fragment mit dem besten Gesamtscore gewählt
+
+---
+### 6. Start des Assemblierungsprozesses
+
+Nach dem Einlesen oder Generieren der Fragmente beginnt der **Greedy-Assembly**, und das Tool versucht, die ursprüngliche DNA-Sequenz zu rekonstruieren.
+
+---
+### 7. Ausgabe und Erfolgskontrolle
+
+- Die rekonstruierte Sequenz wird angezeigt.
+- Falls `generate` gewählt wurde, wird geprüft, ob die Originalsequenz korrekt rekonstruiert wurde.
+- Das Ergebnis wird deutlich angezeigt: „Sequenzierung erfolgreich“ oder „fehlgeschlagen“.
