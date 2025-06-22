@@ -1,5 +1,8 @@
 # DNA-Sequenz-Assembler mit Greedy-Algorithmus
 
+**Hinweis:** vollständiges Projekt auf https://github.com/cyHeff5/bioinf-ss25-seqassembler
+
+
 Mithilfe dieses Tools kann eine ursprüngliche DNA-Sequenz aus überlappenden Fragmenten rekonstruiert werden. Dabei kommt ein Greedy-Ansatz zum Einsatz, der durch unterschiedliche Strategien zur Orientierung und Auswahl von Fragmenten ergänzt wird. Das Programm kann sowohl mit echten Daten als auch mit synthetisch generierten Testdaten genutzt werden.
 
 ## Voraussetzungen
