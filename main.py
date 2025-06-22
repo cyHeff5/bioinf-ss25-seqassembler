@@ -2,62 +2,111 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 
-
 from file_parser import FileParser
-from fragment import Fragment
+from fragment_generator import FragmentGenerator
 from orientation_selector import OrientationSelector
+from greedy_assembler import GreedyAssembler
 from overlap_graph import OverlapGraph
-from greedy_assembler import GreedyAssembler 
+
+def ask_choice(prompt: str, choices: list[str]) -> str:
+    """Fragt den Nutzer nach einer Eingabe aus einer Liste erlaubter Optionen."""
+    choices_str = "/".join(choices)
+    while True:
+        value = input(f"{prompt} ({choices_str}): ").strip().lower()
+        if value in choices:
+            return value
+        print("[ERROR] Ungültige Eingabe, bitte erneut versuchen.")
+
+def ask_int(prompt: str, min_val: int = None, max_val: int = None) -> int:
+    """Fragt eine Ganzzahl ab, optional mit Bereich."""
+    while True:
+        try:
+            value = int(input(f"{prompt}: ").strip())
+            if (min_val is not None and value < min_val) or (max_val is not None and value > max_val):
+                print("[ERROR] Zahl außerhalb des gültigen Bereichs.")
+                continue
+            return value
+        except ValueError:
+            print("[ERROR] Bitte eine gültige Ganzzahl eingeben.")
+
+def ask_float(prompt: str, min_val: float = 0.0, max_val: float = 1.0) -> float:
+    """Fragt eine Kommazahl ab, z. B. für Reverse-Ratio."""
+    while True:
+        try:
+            value = float(input(f"{prompt}: ").strip())
+            if value < min_val or value > max_val:
+                print(f"[ERROR] Wert muss zwischen {min_val} und {max_val} liegen.")
+                continue
+            return value
+        except ValueError:
+            print("[ERROR] Bitte eine gültige Kommazahl eingeben.")
+
+def ask_yes_no(prompt: str) -> bool:
+    """Fragt eine Ja/Nein-Frage ab (y/n)."""
+    while True:
+        value = input(f"{prompt} (y/n): ").strip().lower()
+        if value in ("y", "yes"):
+            return True
+        elif value in ("n", "no"):
+            return False
+        print("[ERROR] Bitte 'y' oder 'n' eingeben.")
+
+def pause(msg="\nDrücke Enter, um fortzufahren...\n"):
+    input(msg)
+
 
 def main():
-    print("Willkommen zum DNA-Assembler.")
-    print("Bitte wähle den Sequenztyp:")
-    print("1 – Einzelstrang")
-    print("2 – Doppelstrang")
+    print("Willkommen beim DNA-Sequenzierungstool!")
 
-    auswahl = input("Deine Wahl: ").strip()
+    mode = ask_choice("Möchten Sie eine Datei einlesen, oder zuällige Fragmente generieren?", ["file", "generate"])
+    strand = ask_choice("Möchten Sie einen Einzel- oder Doppelstrang einlesen?", ["single", "double"])
 
-    if auswahl == "1":
-        dateiname = "fragmentsEinzelstrang_short.txt"
-    elif auswahl == "2":
-        dateiname = "fragmentsDoppelstrang_short.txt"
+    if mode == "file":
+        filename = input("Dateiname eingeben (aus dem 'data/' Ordner) ").strip()
+        filepath = f"data/{filename}"
+        fragments = FileParser.parse_fragments(filepath)
+        print(f"{len(fragments)} Fragmente geladen.")
+
     else:
-        print("Ungültige Eingabe. Bitte wähle 1 oder 2.")
-        return
+        length = ask_int("Länge der DNA-Sequenz eingeben", 10)
+        frag_len = ask_int("Durchschnittliche Fragmentlänge eingeben", 5)
+        overlap = ask_int("Mindestüberlappung eingeben", 1)
+        shuffle = ask_yes_no("Fragmente shuffeln?")
+        reverse_ratio = ask_float("Anteil an Reverse Complements eingeben (z. B. 0.4)", 0.0, 1.0) if strand == "double" else 0.0
 
-    dateipfad = os.path.join("data", dateiname)
+        generator = FragmentGenerator(length, frag_len, overlap, shuffle, reverse_ratio)
+        fragments = generator.generate_fragments()
+        print(f"{len(fragments)} Fragmente generiert.")
+        for frag in fragments:
+            print(frag)
 
-    try:
-        parser = FileParser()
-        fragmente = parser.parse_fragments(dateipfad)
+        print("Originalsequenz:", generator.dna)
 
-        print(f"\n{len(fragmente)} Fragmente erfolgreich geladen.")
+    if strand == "double":
+        method = ask_choice("\nOrientierungsmethode wählen", ["local", "global"])
+        selector = OrientationSelector(fragments)
+        fragments = selector.select_orientation_local() if method == "local" else selector.select_orientation_global()
 
-        # Optional anzeigen
-        # for f in fragmente:
-        #     print(f"- {f.id}: {f.sequence[:30]}...")
+    pause()
 
-        # Nur für Doppelstrang: Orientierung wählen
-        if auswahl == "2":
-            selector = OrientationSelector(fragmente)
-            fragmente = selector.select_orientation()
-            print("Orientierungen wurden mit Greedy-Heuristik ausgewählt.")
+    print("Starte Greedy-Assembly...")
+    graph = OverlapGraph(fragments)
+    assembler = GreedyAssembler(graph)
+    result = assembler.assemble()
 
-        # OverlapGraph erstellen
-        graph = OverlapGraph(fragmente)
-        print(f"OverlapGraph mit {len(graph.edges)} Kanten erstellt.")
+    pause()
 
-        # GreedyAssembler ausführen
-        assembler = GreedyAssembler(graph)
-        assembled_sequence = assembler.assemble()
+    print("\nRekonstruierte Sequenz:")
+    print(result.sequence)
+    result_reverse = result.reverse_complement()
 
-        print("\nErgebnis der Assemblierung:")
-        print(assembled_sequence)
-
-    except FileNotFoundError:
-        print(f"Fehler: Datei '{dateipfad}' nicht gefunden.")
-    except Exception as e:
-        print(f"Ein Fehler ist aufgetreten: {e}")
+    if mode == "generate":
+        correct = result.sequence == generator.dna or result_reverse.sequence == generator.dna
+        print("Sequenzierung erfolgreich:", "JA" if correct else "NEIN")
+        if correct:
+            print("Die rekonstruierte Sequenz und das Original sind identisch!")
+        else:
+            print("Die rekonstruierte Sequenz unterscheidet sich vom Original.")
 
 if __name__ == "__main__":
     main()
