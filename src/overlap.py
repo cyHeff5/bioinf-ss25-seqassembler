@@ -1,5 +1,3 @@
-# src/overlap.py
-
 from fragment import Fragment
 
 class Overlap:
@@ -31,3 +29,6 @@ class Overlap:
     @property
     def length(self) -> int:
         return self._length
+    
+    def __str__(self) -> str:
+        return f"{self.source.id} → {self.target.id} (Overlap: {self.length})"

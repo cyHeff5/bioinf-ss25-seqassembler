@@ -11,7 +11,7 @@ class Fragment:
         if not isinstance(sequence, str) or not sequence:
             raise ValueError("Die Sequenz muss ein nicht-leerer String sein.")
         if not all(base in "ATGCatgc" for base in sequence):
-            print(f"Warnung: Fragment {id} enthält möglicherweise ungültige Basen: {sequence}")
+            raise ValueError(f"Die Sequenz enthält möglicherweise ungültige Basen: {sequence}")
 
         self._id = id
         self._sequence = sequence.upper()
@@ -27,6 +27,15 @@ class Fragment:
         return self._id
 
     def reverse_complement(self) -> "Fragment":
+        """
+        Erzeugt das Reverse Complement der Sequenz und gibt ein neues Fragment zurück.
+        """
         complement = {"A": "T", "T": "A", "G": "C", "C": "G"}
         rc_seq = "".join(complement[base] for base in reversed(self._sequence))
         return Fragment(f"{self._id}_cf", rc_seq)
+    
+    def __str__(self) -> str:
+        """
+        String-Repräsentation des Fragments.
+        """
+        return f"Fragment {self._id}: {self._sequence}"
