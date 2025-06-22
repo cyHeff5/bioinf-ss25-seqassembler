@@ -1,6 +1,7 @@
 # src/greedy_assembler.py
 
-from overlap_graph import OverlapGraph, Overlap
+from overlap_graph import OverlapGraph
+from overlap import Overlap
 from fragment import Fragment
 
 class GreedyAssembler:
@@ -22,7 +23,9 @@ class GreedyAssembler:
             best_edge = self._find_best_overlap()
 
             if best_edge is None:
-                raise ValueError("Keine weiteren Overlaps vorhanden – Sequenz kann nicht vollständig rekonstruiert werden.")
+                raise ValueError(f"Keine weiteren Overlaps vorhanden – Sequenz kann nicht vollständig rekonstruiert werden.\n" \
+                "Verbleibende Fragmente:" \
+                f"{self.graph.fragments}")
 
             # Merge source → target
             merged = self.graph.merge_and_replace(

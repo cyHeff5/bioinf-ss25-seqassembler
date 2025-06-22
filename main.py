@@ -2,47 +2,62 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 
+
 from file_parser import FileParser
+from fragment import Fragment
+from orientation_selector import OrientationSelector
 from overlap_graph import OverlapGraph
-from greedy_assembler import GreedyAssembler
-
-def choose_file() -> str:
-    """
-    Bietet eine Auswahl an Fragmentdateien im data/-Ordner.
-    """
-    options = {
-        "1": "fragmenteEinzelstrang.txt",
-        "2": "fragmentsEinzelstrang_short.txt"
-    }
-
-    print("🧬 Wähle die Fragment-Datei aus:\n")
-    for key, filename in options.items():
-        print(f"{key}) {filename}")
-
-    choice = ""
-    while choice not in options:
-        choice = input("\nEingabe (1/2): ").strip()
-
-    selected_path = os.path.join("data", options[choice])
-    print(f"\n📂 Gewählte Datei: {selected_path}")
-    return selected_path
+from greedy_assembler import GreedyAssembler 
 
 def main():
-    filepath = choose_file()
+    print("Willkommen zum DNA-Assembler.")
+    print("Bitte wähle den Sequenztyp:")
+    print("1 – Einzelstrang")
+    print("2 – Doppelstrang")
+
+    auswahl = input("Deine Wahl: ").strip()
+
+    if auswahl == "1":
+        dateiname = "fragmentsEinzelstrang_short.txt"
+    elif auswahl == "2":
+        dateiname = "fragmentsDoppelstrang_short.txt"
+    else:
+        print("Ungültige Eingabe. Bitte wähle 1 oder 2.")
+        return
+
+    dateipfad = os.path.join("data", dateiname)
 
     try:
-        fragments = FileParser.parse_fragments(filepath)
-        print(f"\n📄 {len(fragments)} Fragmente geladen.")
+        parser = FileParser()
+        fragmente = parser.parse_fragments(dateipfad)
 
-        graph = OverlapGraph(fragments)
+        print(f"\n{len(fragmente)} Fragmente erfolgreich geladen.")
+
+        # Optional anzeigen
+        # for f in fragmente:
+        #     print(f"- {f.id}: {f.sequence[:30]}...")
+
+        # Nur für Doppelstrang: Orientierung wählen
+        if auswahl == "2":
+            selector = OrientationSelector(fragmente)
+            fragmente = selector.select_orientation()
+            print("Orientierungen wurden mit Greedy-Heuristik ausgewählt.")
+
+        # OverlapGraph erstellen
+        graph = OverlapGraph(fragmente)
+        print(f"OverlapGraph mit {len(graph.edges)} Kanten erstellt.")
+
+        # GreedyAssembler ausführen
         assembler = GreedyAssembler(graph)
-        result_fragment = assembler.assemble()
+        assembled_sequence = assembler.assemble()
 
-        print("\n✅ Rekonstruierte Sequenz:")
-        print(result_fragment.get_sequence())
+        print("\nErgebnis der Assemblierung:")
+        print(assembled_sequence)
 
+    except FileNotFoundError:
+        print(f"Fehler: Datei '{dateipfad}' nicht gefunden.")
     except Exception as e:
-        print(f"❌ Fehler beim Verarbeiten: {e}")
+        print(f"Ein Fehler ist aufgetreten: {e}")
 
 if __name__ == "__main__":
     main()
