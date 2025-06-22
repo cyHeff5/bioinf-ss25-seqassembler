@@ -1,6 +1,6 @@
 # DNA-Sequenz-Assembler mit Greedy-Algorithmus
 
-Dieses Tool rekonstruiert eine ursprüngliche DNA-Sequenz aus überlappenden Fragmenten. Dabei wird ein **Greedy-Ansatz** verwendet, der durch unterschiedliche Strategien zur Orientierung und Auswahl von Fragmenten ergänzt wird. Das Programm lässt sich sowohl mit echten Daten als auch mit synthetisch generierten Testdaten nutzen.
+Mithilfe dieses Tools kann eine ursprüngliche DNA-Sequenz aus überlappenden Fragmenten rekonstruiert werden. Dabei kommt ein Greedy-Ansatz zum Einsatz, der durch unterschiedliche Strategien zur Orientierung und Auswahl von Fragmenten ergänzt wird. Das Programm kann sowohl mit echten Daten als auch mit synthetisch generierten Testdaten genutzt werden.
 
 ## Voraussetzungen
 - Python 3.10 oder neuer
